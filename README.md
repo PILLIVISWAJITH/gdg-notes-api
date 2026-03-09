@@ -12,6 +12,9 @@ This is a backend API for managing personal notes, built for the GDG on Campus S
 * Secure password hashing.
 * CRUD operations for notes.
 * **Role-Based Access Control (RBAC):** Regular users can manage only their own notes. Admin users can view all notes and delete any note.
+* **Optional Enhancements Completed:**
+  * Pagination for notes listing (`?page` and `?limit`).
+  * Search notes by title (`?search`).
 
 ## Setup Instructions
 

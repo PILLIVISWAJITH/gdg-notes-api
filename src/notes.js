@@ -19,17 +19,32 @@ router.post('/', (req, res) => {
 });
 
 router.get('/', (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    
+    const searchQuery = req.query.search ? `%${req.query.search}%` : '%';
+
+    let query = '';
+    let params = [];
+
     if (req.user.role === 'admin') {
-        db.all(`SELECT * FROM notes`, [], (err, rows) => {
-            if (err) return res.status(500).json({ error: 'Database error' });
-            res.json(rows);
-        });
+        query = `SELECT * FROM notes WHERE title LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+        params = [searchQuery, limit, offset];
     } else {
-        db.all(`SELECT * FROM notes WHERE user_id = ?`, [req.user.id], (err, rows) => {
-            if (err) return res.status(500).json({ error: 'Database error' });
-            res.json(rows);
-        });
+        query = `SELECT * FROM notes WHERE user_id = ? AND title LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+        params = [req.user.id, searchQuery, limit, offset];
     }
+
+    db.all(query, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        res.json({
+            page: page,
+            limit: limit,
+            results: rows.length,
+            notes: rows
+        });
+    });
 });
 
 router.put('/:id', (req, res) => {
